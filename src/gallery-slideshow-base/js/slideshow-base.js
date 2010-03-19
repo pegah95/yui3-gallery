@@ -67,6 +67,9 @@ Slideshow.ATTRS = {
         }
     },
     slide_count: { value: 0 },
+    activate_play_pause_buttons: { value: true },
+    play_button: { value: null },
+    pause_button: { value: null },
     activate_next_prev_buttons: { value: true },
     next_button: { value: null },
     prev_button: { value: null },
@@ -77,9 +80,13 @@ Slideshow.ATTRS = {
 Slideshow.AUTO_SLIDESHOW_SELECTOR = '.slideshow';
 Slideshow.SLIDE_SELECTOR = '.slide';
 Slideshow.CURRENT_CLASS = 'current';
+Slideshow.PLAY_BUTTON_SELECTOR = '.play';
+Slideshow.PAUSE_BUTTON_SELECTOR = '.pause';
 Slideshow.NEXT_BUTTON_SELECTOR = '.next';
 Slideshow.PREV_BUTTON_SELECTOR = '.previous';
 Slideshow.BUTTON_SELECTOR = '.slideSelector';
+Slideshow.INACTIVE_CLASS = 'inactive';
+
 Slideshow.HTML_PARSER = {
     slides: function (contentBox) {
         var slide_nodes = contentBox.all(Slideshow.SLIDE_SELECTOR);
@@ -87,6 +94,12 @@ Slideshow.HTML_PARSER = {
             slide_nodes = contentBox.get('children');
         }
         return slide_nodes;
+    },
+    play_button: function(contentBox) {
+        return contentBox.one(Slideshow.PLAY_BUTTON_SELECTOR);
+    },
+    pause_button: function(contentBox) {
+        return contentBox.one(Slideshow.PAUSE_BUTTON_SELECTOR);
     },
     next_button: function(contentBox) {
         return contentBox.one(Slideshow.NEXT_BUTTON_SELECTOR);
@@ -102,17 +115,21 @@ Slideshow.HTML_PARSER = {
 Y.extend(Slideshow, Y.Widget, {
     initializer: function() {
         // Get how many slides there are
-        var slides = this.get('slides');
-        var slide_count = slides.size();
+        var slides = this.get('slides'),
+            slide_count = slides.size(),
+            current_slide = Y.Array.indexOf(slides.hasClass(Slideshow.CURRENT_CLASS), true);
+        
         this.set('slide_count', slide_count);
-        // Setting the current slide
-        var current_slide = Y.Array.indexOf(slides.hasClass(Slideshow.CURRENT_CLASS), true);
         if (current_slide > -1) {
             this.set('current_slide', current_slide);
         }
         slides.item(this.get('current_slide')).addClass(Slideshow.CURRENT_CLASS);
         this.display_slide = this.get('current_slide');
         this._after_display();
+
+        if (this.get('activate_play_pause_buttons')) {
+            this._init_play_pause_buttons();
+        }
         
         if (this.get('activate_next_prev_buttons')) {
             this._init_next_prev_buttons();
@@ -128,6 +145,7 @@ Y.extend(Slideshow, Y.Widget, {
         this._update_slide_display();
         if (this.get('auto_advance')) {
             this._pause();
+            
         }
     },
     
@@ -247,8 +265,58 @@ Y.extend(Slideshow, Y.Widget, {
         }
     },
 
+    _toggle_play_pause: function() {
+        if (this.get('activate_play_pause_buttons')) {
+            if (this.play_btn) {
+                if (this.get('auto_advance')) {
+                    this.play_btn.addClass(Slideshow.INACTIVE_CLASS);
+                } else {
+                    this.play_btn.removeClass(Slideshow.INACTIVE_CLASS);
+                }
+            }
+            if (this.pause_btn) {
+                if (this.get('auto_advance')) {
+                    this.pause_btn.removeClass(Slideshow.INACTIVE_CLASS);
+                } else {
+                    this.pause_btn.addClass(Slideshow.INACTIVE_CLASS);
+                }
+            }
+        }
+    },
+    
+    _init_play_pause_buttons: function() {
+        this.play_btn = this.get('play_button');
+        this.pause_btn = this.get('pause_button');
+        this._toggle_play_pause();
+
+        if (this.play_btn) {
+            this.play_btn.on('click', function(e){
+                e.preventDefault();
+                this.fire('slideshow:play-clicked', {
+                    slide: this.get('slides').item(this.get('current_slide')),
+                    slide_number: this.get('current_slide')
+                });
+                this.run();
+                this._toggle_play_pause();
+            }, this);
+        }
+
+        if (this.pause_btn) {
+            this.pause_btn.on('click', function(e){
+                e.preventDefault();
+                this.fire('slideshow:pause-clicked', {
+                    slide: this.get('slides').item(this.get('current_slide')),
+                    slide_number: this.get('current_slide')
+                });
+                this.stop();
+                this._toggle_play_pause();
+            }, this);
+        }
+    },
+
     _init_next_prev_buttons: function() {
-        var next = this.get('next_button');
+        var next = this.get('next_button'),
+            prev = this.get('prev_button');
         if (next) {
             next.on('click', function(e){
                 e.preventDefault();
@@ -260,7 +328,7 @@ Y.extend(Slideshow, Y.Widget, {
                 this.advance();
             }, this);
         }
-        var prev = this.get('prev_button');
+
         if (prev) {
             prev.on('click', function(e){
                 e.preventDefault();
@@ -275,8 +343,8 @@ Y.extend(Slideshow, Y.Widget, {
     },
 
     _init_buttons: function() {
-        var buttons = this.get('slide_buttons');
-        var button_count = buttons.size();
+        var buttons = this.get('slide_buttons'),
+            button_count = buttons.size();
         if (button_count > 0) {
             var slide_click = function(e, slide_number) {
                 e.preventDefault();
@@ -291,6 +359,9 @@ Y.extend(Slideshow, Y.Widget, {
             // Setting up the on click functionality for each button
             for(var i =0; i < button_count; i++) {
                 buttons.item(i).on('click', slide_click, this, i);
+                if (i == this.get('current_slide')) {
+                    buttons.item(i).addClass('current');
+                }
             }
             // Changing the current button as the slide changes
             this.on('slideshow:before-slide-displayed', function(e) {
@@ -320,8 +391,8 @@ Y.extend(Slideshow, Y.Widget, {
 
 Slideshow.auto = function(attrs) {
     if (!attrs) { attrs = {}; }
-    selector = attrs.selector || Slideshow.AUTO_SLIDESHOW_SELECTOR;
-    pause_time = attrs.pause_time || Slideshow.PAUSE_TIME;
+    var selector = attrs.selector || Slideshow.AUTO_SLIDESHOW_SELECTOR,
+        pause_time = attrs.pause_time || Slideshow.PAUSE_TIME;
 
     Y.all(selector).each(function() {
         var slideshow_instance = new Slideshow({
@@ -333,3 +404,4 @@ Slideshow.auto = function(attrs) {
 };
 
 Y.Slideshow = Slideshow;
+
