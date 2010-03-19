@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .slide { display: none;}
+        .slide.current { display: block; } 
+    </style>    
+</head>
+<body>
+<div class="slideshow">
+    <div class="slide current">Slide 1</div>
+    <div class="slide">Slide 2</div>
+    <div class="slide">Slide 3</div>
+    <div class="slide">Slide 4</div>
+</div>
+    
+<script src="http://yui.yahooapis.com/3.0.0/build/yui/yui-min.js"></script>
+<script type="text/javascript">
+    YUI({
+        modules: {
+            'gallery-slideshow-base': {
+                fullpath: 'build_tmp/gallery-slideshow-base-debug.js',
+                requires: ['node', 'event', 'widget']
+            }
+        }
+    }).use("gallery-slideshow-base", function(Y) {
+        Y.Slideshow.auto();
+    });
+</script>
+</body>
+</html>
