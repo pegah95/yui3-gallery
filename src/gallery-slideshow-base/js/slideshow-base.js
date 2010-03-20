@@ -1,50 +1,3 @@
-/**
-* <p>The Slideshow widget easily transforms html content into a slideshow.</p>
-* 
-* <p>The simplest way to use the slideshow is to add the CSS class <code>slideshow</code>
-* to an element in the html page, and then within that element add the CSS class <code>slide</code>
-* to the subelements that you wanted rotated through as the slides. Then add a call to 
-* <code>Slideshow.auto()</code></p>
-* 
-* <strong>Example</strong><br>
-* <code>
-* &lt;!DOCTYPE html&gt;
-* &lt;html&gt;
-* &lt;head&gt;
-*     &lt;style&gt;
-*         .slide { display: none;}
-*         .slide.current { display: block; } 
-*     &lt;/style&gt;    
-* &lt;/head&gt;
-* &lt;body&gt;
-* &lt;div class="slideshow"&gt;
-*     &lt;div class="slide current"&gt;Slide 1&lt;/div&gt;
-*     &lt;div class="slide"&gt;Slide 2&lt;/div&gt;
-*     &lt;div class="slide"&gt;Slide 3&lt;/div&gt;
-*     &lt;div class="slide"&gt;Slide 4&lt;/div&gt;
-* &lt;/div&gt;
-*     
-* &lt;script src="http://yui.yahooapis.com/3.0.0/build/yui/yui-min.js"&gt;&lt;/script&gt;
-* &lt;script type="text/javascript"&gt;
-*     YUI({
-*         modules: {
-*             'gallery-slideshow-base': {
-*                 fullpath: 'build_tmp/gallery-slideshow-base-debug.js',
-*                 requires: ['node', 'event', 'widget']
-*             }
-*         }
-*     }).use("gallery-slideshow-base", function(Y) {
-*         Y.Slideshow.auto();
-*     });
-* &lt;/script&gt;
-* &lt;/body&gt;
-* &lt;/html&gt;
-* </code>
-* 
-* @module gallery-slideshow-base
-*/
-
-
 function Slideshow(config) {
     Slideshow.superclass.constructor.apply(this, arguments);
 }
@@ -96,16 +49,16 @@ Slideshow.HTML_PARSER = {
         return slide_nodes;
     },
     play_button: function(contentBox) {
-        return contentBox.one(Slideshow.PLAY_BUTTON_SELECTOR);
+        return contentBox.all(Slideshow.PLAY_BUTTON_SELECTOR);
     },
     pause_button: function(contentBox) {
-        return contentBox.one(Slideshow.PAUSE_BUTTON_SELECTOR);
+        return contentBox.all(Slideshow.PAUSE_BUTTON_SELECTOR);
     },
     next_button: function(contentBox) {
-        return contentBox.one(Slideshow.NEXT_BUTTON_SELECTOR);
+        return contentBox.all(Slideshow.NEXT_BUTTON_SELECTOR);
     },
     prev_button: function(contentBox) {
-        return contentBox.one(Slideshow.PREV_BUTTON_SELECTOR);
+        return contentBox.all(Slideshow.PREV_BUTTON_SELECTOR);
     },
     slide_buttons: function(contentBox) {
         return contentBox.all(Slideshow.BUTTON_SELECTOR);
@@ -185,7 +138,6 @@ Y.extend(Slideshow, Y.Widget, {
             slide_number: this.display_slide
         });
     },
-
 
     _hide_slide: function(slide_number) {
         this._before_hide();
