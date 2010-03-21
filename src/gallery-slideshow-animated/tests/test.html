@@ -2,7 +2,7 @@
 <html>
 <head>
     <style>
-        .slideshow{position: relative; height: 250px; width: 393px; overflow: hidden;}
+        .slideshow {position: relative; height: 250px; width: 393px; overflow: hidden;}
         .slide { display: none; position: absolute;}
         .slide.current { display: block; }
         .inactive {color: #ccc; cursor: default;}
@@ -11,6 +11,11 @@
         .panningSlideshow .viewer {position: relative; width: 393px; height:212px; overflow: hidden;}
         .panningSlideshow .container {width:1179px;height:636px;position: absolute;}
         .panningSlideshow .slide {display: block; float: left; position: relative;}
+        #man_slideshow {position: relative; height: 212px; width: 393px; overflow: hidden;}
+        .shrinkHorizontalSlideshow {width: 100%;}
+        .shrinkHorizontalSlideshow .slide { display: inline; overflow: hidden; position: relative; float: left;}
+        .shrinkHorizontalSlideshow .slide img { display: inline;}
+        
     </style>    
 </head>
 <body>
@@ -83,7 +88,6 @@
 
 
 <h2>Slideshow with panning transition</h2>
-<p>Blah</p>
 <div class="slideshow panningSlideshow">
     <div class="viewer">
         <div class="container">
@@ -114,7 +118,31 @@
 </div>  
 
 
+<h2>Slideshow with new auto of shrinking</h2>
+<div class="slideshow shrinkSlideshow">
+    <div class="viewer">
+        <img src="media/slide_1.jpg" class="slide current">
+        <img src="media/slide_2.jpg" class="slide">
+        <img src="media/slide_3.jpg" class="slide">
+        <img src="media/slide_4.jpg" class="slide">
+    </div>
+    <div>
+        <a href="" class="previous">&lt; prev</a> &nbsp; 
+        <a href="" class="slideSelector">1</a>
+        <a href="" class="slideSelector">2</a>
+        <a href="" class="slideSelector">3</a>
+        <a href="" class="slideSelector">4</a>
+        &nbsp; <a href="" class="next">next &gt;</a>  
+    </div>
+</div>  
 
+<h2>Slideshow with new auto of horizontal shrinking</h2>
+<div class="slideshow shrinkHorizontalSlideshow">
+        <div class="slide current"><img src="media/slide_1.jpg" class="slideSelector"></div>
+        <div class="slide"><img src="media/slide_2.jpg" class="slideSelector"></div>
+        <div class="slide"><img src="media/slide_3.jpg" class="slideSelector"></div>
+        <div class="slide"><img src="media/slide_4.jpg" class="slideSelector"></div>
+</div>  
 
 <div id="man_slideshow_events"  style="border: 1px solid #ccc; margin-left: 15px; float: right;">
     <h2>Manual Slideshow Events</h2>
@@ -155,9 +183,49 @@
             }
         }
     }).use("gallery-slideshow-animated", "log", "dump", function(Y) {
-        //Y.SlideshowAnimated.ANIMATION_DURATION = 0.5;
-        //Y.SlideshowAnimated.easing = Y.Easing.bounceBoth;
-        //Y.log(Y.dump(Y.SlideshowAnimated.easing ));
+
+    Y.SlideshowAnimated.auto_shows.shrinkSlideshow = function(show_node, user_attrs) {
+        var show_attrs = {
+            contentBox: show_node,
+            animation_out: { from: { width: 393 }, to: {width: 0} },
+            animation_in: { from: {width: 0 }, to: {width: 393} },
+            reverse_animation: { value: true }
+        };       
+        return new Y.SlideshowAnimated(Y.SlideshowAnimated._auto_merge_attrs(show_attrs, user_attrs));
+    };
+
+    Y.SlideshowAnimated.auto_shows.shrinkHorizontalSlideshow = function(show_node, user_attrs) {
+        var slide = Y.SlideshowAnimated._auto_get_slide(show_node), 
+            width = parseInt(slide.getComputedStyle('width'), 10),
+            new_width = 35,
+            slideshow;
+            
+        if (! width) {
+            if(slide.getStyle('display').toLowerCase() == 'none') {
+                slide.setStyle('display', 'block');
+                width = parseInt(slide.getComputedStyle('width'), 10);
+                slide.setStyle('display', 'none');
+            }
+        }
+
+        show_attrs = {
+            contentBox: show_node,
+            animation_out: { from: { width: width }, to: {width: new_width} },
+            animation_in: { from: {width: new_width }, to: {width: width} }
+        };       
+
+        //show_attrs.reverse_animation = { value: true };
+        slideshow = new Y.SlideshowAnimated(Y.SlideshowAnimated._auto_merge_attrs(show_attrs, user_attrs));
+        show_node.all('.slide').each(function() {
+            console.log('in slide');
+            if (! this.hasClass('current')){
+                this.setStyle('width', new_width + 'px');
+            } 
+        });
+        return slideshow;
+    };
+    
+
         Y.SlideshowAnimated.auto({pause_time: 4, duration: 2, easing: Y.Easing.bounceOut});
         
         var append_node = Y.one('#man_slideshow_events'),
@@ -170,10 +238,7 @@
                 'slideshow:play-clicked',
                 'slideshow:pause-clicked'
             ],
-            man_slideshow = new Y.SlideshowAnimated({
-                contentBox: '#man_slideshow',
-                pause_time: 3
-            });
+            man_slideshow = Y.SlideshowAnimated.auto_shows.verticalSlideshow(Y.one('#man_slideshow'), { pause_time: 8 });
 
         man_slideshow.render();
 
