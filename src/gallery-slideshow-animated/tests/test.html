@@ -217,7 +217,6 @@
         //show_attrs.reverse_animation = { value: true };
         slideshow = new Y.SlideshowAnimated(Y.SlideshowAnimated._auto_merge_attrs(show_attrs, user_attrs));
         show_node.all('.slide').each(function() {
-            console.log('in slide');
             if (! this.hasClass('current')){
                 this.setStyle('width', new_width + 'px');
             } 
@@ -225,28 +224,8 @@
         return slideshow;
     };
     
+    Y.SlideshowAnimated.auto();
 
-        Y.SlideshowAnimated.auto({pause_time: 4, duration: 2, easing: Y.Easing.bounceOut});
-        
-        var append_node = Y.one('#man_slideshow_events'),
-            slideshow_events = [
-                'slideshow:slide-selected',
-                'slideshow:before-slide-displayed',
-                'slideshow:slide-displayed',
-                'slideshow:before-slide-hidden',
-                'slideshow:slide-hidden',
-                'slideshow:play-clicked',
-                'slideshow:pause-clicked'
-            ],
-            man_slideshow = Y.SlideshowAnimated.auto_shows.verticalSlideshow(Y.one('#man_slideshow'), { pause_time: 8 });
-
-        man_slideshow.render();
-
-        for(var i=0, len=slideshow_events.length;i < len; i++) {
-            man_slideshow.on(slideshow_events[i], function(e) {
-                append_node.append(e.type +' -- slide number: ' + e.slide_number +'<br>');
-            });
-        }
     });
 </script>
 </body>

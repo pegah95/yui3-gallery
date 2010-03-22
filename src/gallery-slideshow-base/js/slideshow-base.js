@@ -75,6 +75,9 @@ Y.extend(Slideshow, Y.Widget, {
         this.set('slide_count', slide_count);
         if (current_slide > -1) {
             this.set('current_slide', current_slide);
+        } else {
+            // No current slide so add the class to the first slide
+            slides.item(0).addClass(Slideshow.CURRENT_CLASS);
         }
         slides.item(this.get('current_slide')).addClass(Slideshow.CURRENT_CLASS);
         this.display_slide = this.get('current_slide');
@@ -190,9 +193,10 @@ Y.extend(Slideshow, Y.Widget, {
     _update_slide_display: function() {
         var current = this.get('current_slide'),
             count = this.get('slide_count'),
-            slides = this.get('slides');
+            slides = this.get('slides'),
+            i;
             
-        for (var i = 0; i < count; i++) {
+        for (i = 0; i < count; i++) {
             if (i == current) {
                 if (!slides.item(i).hasClass(Slideshow.CURRENT_CLASS)) {
                     this.display_slide = i;
@@ -296,9 +300,10 @@ Y.extend(Slideshow, Y.Widget, {
 
     _init_buttons: function() {
         var buttons = this.get('slide_buttons'),
-            button_count = buttons.size();
+            button_count = buttons.size(),
+            slide_click, i;
         if (button_count > 0) {
-            var slide_click = function(e, slide_number) {
+            slide_click = function(e, slide_number) {
                 e.preventDefault();
                 this.stop();
                 this.fire('slideshow:slide-selected', {
@@ -309,7 +314,7 @@ Y.extend(Slideshow, Y.Widget, {
             };
 
             // Setting up the on click functionality for each button
-            for(var i =0; i < button_count; i++) {
+            for(i =0; i < button_count; i++) {
                 buttons.item(i).on('click', slide_click, this, i);
                 if (i == this.get('current_slide')) {
                     buttons.item(i).addClass('current');

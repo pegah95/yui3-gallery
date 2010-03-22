@@ -61,8 +61,10 @@
             if (this._anim_running()) {
                 Y.later(this.get('pause_time')/20, this, 'show_slide', slide_number);
             } else {
-                this.set('current_slide', slide_number);
-                this.syncUI();
+                if (slide_number != this.get('current_slide')) {
+                    this.set('current_slide', slide_number);
+                    this.syncUI();
+                }
             }
         },
 
@@ -254,6 +256,7 @@
         var slide = show_node.one('.slide.current');
         if (! slide ) {
             slide = show_node.one('.slide');
+            slide.addClass(Y.Slideshow.CURRENT_CLASS);
         }
         return slide;  
     };
@@ -297,7 +300,6 @@
             if(slide.getStyle('display').toLowerCase() == 'none') {
                 slide.setStyle('display', 'block');
                 width = parseInt(slide.getComputedStyle('width'), 10);
-                slide.setStyle('display', 'none');
             }
         }
         x = parseInt(slide.getComputedStyle('left'), 10) || 0;
@@ -326,7 +328,6 @@
             if(slide.getStyle('display').toLowerCase() == 'none') {
                 slide.setStyle('display', 'block');
                 height = parseInt(slide.getComputedStyle('height'), 10);
-                slide.setStyle('display', 'none');
             }
         }
 
