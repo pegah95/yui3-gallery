@@ -1,4 +1,4 @@
-TextExpander = function(cfg) {
+var TextExpander = function(cfg) {
     TextExpander.superclass.constructor.apply(this, arguments);
 };
 
@@ -34,7 +34,7 @@ Y.extend(TextExpander, Y.Plugin.Base, {
         }
         if (! this.get('max_height')) {
             if (this.line_height_set) {
-                this.set('max_height', this.line_height * 25);
+                this.set('max_height', this.line_height * 35);
             } else {
                 this.set('max_height', 450);
             }
@@ -117,3 +117,4 @@ Y.extend(TextExpander, Y.Plugin.Base, {
             (this.t_area.get('scrollHeight') > this.get('max_height') ? "auto" : "hidden")); 
     }
 });
+Y.TextExpander = TextExpander;
